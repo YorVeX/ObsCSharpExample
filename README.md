@@ -4,8 +4,7 @@ Example for an OBS plugin written in C# containing various standard items like o
 
 ![image](https://user-images.githubusercontent.com/528974/218354411-384a533b-1f14-43a5-b6d8-b78fa18a4b1d.png)
 
-OBS Classic still had a [CLR Host Plugin](https://obsproject.com/forum/resources/clr-host-plugin.21/), but with OBS Studio writing plugins in C# wasn't possible anymore. This has changed as of recently.
-The very first without real-world use was [this](https://github.com/kostya9/DotnetObsPluginWithNativeAOT) example plugin demonstrating the basic concept of writing an OBS Studio plugin using .NET 7 and NativeAOT.
+OBS Classic still had a [CLR Host Plugin](https://obsproject.com/forum/resources/clr-host-plugin.21/), but with OBS Studio writing plugins in C# wasn't possible anymore. This has changed as of recently. With the release of .NET 7 that includes NativeAOT it is now possible to build native code libraries that can be loaded by OBS Studio. This repository is here to show you how.
 
 
 ## Prerequisites
