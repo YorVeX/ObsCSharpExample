@@ -24,22 +24,40 @@ OBS Classic still had a [CLR Host Plugin](https://obsproject.com/forum/resources
 ## Content
 This plugin code demonstrates different concepts about using unmanaged vs. managed code within a C# OBS plugin for the different items and source code files it includes. What exactly each file demonstrates is explained in the next sections.
 
+Disclaimer: The main focus of this project is to give a general idea of how an OBS plugin can be implemented with C#. I am new to OBS plugin programming myself, while I try my best to show how each of the items is properly implemented I might have made mistakes there that an experienced OBS plugin programmer wouldn't have made. Feel free to file GitHub issues for mistakes that you find either in the documentation text here or in the code and I will correct them.
+
+### ObsCSharpExample.csproj
+This is the project file that defines the project to include NetObsBindings assembly and be compiled as a NativeAOT application. Feel free to adapt this to your needs. There is only this and no solution file (.sln) since Visual Studio wouldn't add anything to this except bloat ;-)
+
 ### Module.cs
-_TBD_
+This is the central file for the module. As you can see from this example a plugin module can include multiple objects like sources, filters and outputs but they need to be registered and managed from a central instance, which is this module.
+
+A secondary job this class has is providing global utility functionality to other classes in the module, e.g. a log function or an implementation for the OBS locale system (which is also on module level, meaning that all objects living in a module share the same locale files) with the ObsText(String) methods. 
+
+There is also a GetString() method which automatically frees memory from unmanaged strings from OBS before returning their managed string representation. Note that whether this should be used depends on the function the string is retrieved from. E.g. ObsData.obs_data_get_string() returns a string from a settings object that will continue to live after that method call so you need to leave the memory for it allocated, whereas Obs.obs_module_get_config_path() returns a string for your temporary use that should be "bfreed" afterwards, so use GetString() on that one for convenience.
+
+Last but not least the Module class also takes care of talking to the frontend API to register an item for the Tools menu.
+
+### locale/en-US.ini
+This file contains the locale strings used for this project. If you need new text items just add them here.
 
 ### SettingsDialog.cs
-_TBD_
+This is not exactly the example of a standard procedure to register a dialog that can be called from the Tools main menu in OBS, more like a small hack. Instead of bringing our own Qt implementation to add a GUI object (the dialog window for our output settings) we create a dummy source that has properties attached to it and then show these properties using the ObsFrontendApi.obs_frontend_open_source_properties() method when clicking the Tools menu entry.
+
+This smart idea was blatantly stolen from [fzwoch](https://github.com/fzwoch), who used this method to register the settings dialog for his very nice [obs-teleport plugin](https://github.com/fzwoch/obs-teleport). I liked it so much that I thought it should definitely be part of an example project. But beware, as with all hacks it might break because of future changes to it that don't accomodate for this unintended way of using things. On the other hand it has the advantage that it will keep on working regardless of Qt (or in general UI) library changes in OBS and always respect theme settings correctly.
+
+In addition to example settings (called "properties" in OBS) there is also buttons to start and stop the example output that is implemented in the Output class in Output.cs. Note that as soon as an output is active certain settings in OBS are locked, e.g. the resolution, so that would also be a way to test whether the output was really started after you clicked the Start button.
+
+### Output.cs
+This class registers an [output](https://obsproject.com/docs/reference-outputs.html) in OBS. When it's active it receives all the frame data from OBS. This specific output doesn't register for audio data, though it still shows the function signature necessary for the raw_audio callback, which needs to be provided even when the output is only registering itself for video data. The video data is itself is also not really processed, for the sake of this example the plugin is merely logging the frame timestamps as OBS debug log messages.
 
 ### Filter.cs
 _TBD_
 
-### Output.cs
+## Source.cs
 _TBD_
 
-### locale/en-US.ini
-_TBD_
-
-## Building
+# Building
 This plugin depends on the [NetObsBindings](https://github.com/kostya9/NetObsBindings) for building, you don't need to build this from source though, the project file provided in this repo already includes this as a [NuGet package](https://www.nuget.org/packages/NetObsBindings).
 Generally the included build.cmd file is executing the necessary command to create the build, but some prerequisites need to be installed in the system first.
 
