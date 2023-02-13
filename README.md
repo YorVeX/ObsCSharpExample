@@ -21,6 +21,22 @@ OBS Classic still had a [CLR Host Plugin](https://obsproject.com/forum/resources
 - **Q**: Will there be a 32 bit version of this plugin?
   - **A**: No. Feel free to try and compile it for x86 targets yourself, last time I checked it wasn't fully supported in NativeAOT.
 
+## C# programming for OBS with NetObsBindings
+
+### Type differences
+- Boolean values from OBS are treated as type "byte" in NetObsBindings. This applies to both directions. One could simply work with using 0 or 1 when calling OBS functions that return or expect bool parameters, but for better readability it is recommended to use something like Convert.ToByte(true) or Convert.ToBoolean(byteParamFromObs).
+- Strings are very different between OBS/C++ and C#. NetObsBindings represent strings from OBS as a pointer to an sbyte, which is simply a pointer to the first character of the string. To work with such strings in C# they need to be converted to a managed string first. Fortunately there is the .NET function Marshal.PtrToStringUTF8() which does all the hard work. After this function was called the managed string is not tied to the original unmanaged string, so even if the latter is removed from memory the managed string can still be accessed, it is an independent copy of the original string.
+- The other direction is a bit more tedious. A managed string might have its location in memory changed at any time, but if you pass this to unmanaged code this code needs to be able to rely on finding the given string at the pointer location in memory at all times. Therefore the [fixed](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/fixed) statement is used to pin a byte array to a fixed memory location. This byte array is then filled with string data that is converted to byte data by using the .NET base function Encoding.UTF8.GetBytes(), since OBS works with UTF8 strings. Since OBS functions through NetObsBindings expect an sbyte pointer the byte pointer created this way is simply cast to an sbyte pointer when handing over the parameter to the function (from pointer/memory perspective an sbyte pointer is the same as a byte pointer so a simple cast does the job here).
+
+### Managed vs. unmanaged, instance vs. static
+For various objects different approaches were used so that all of these variants are demonstrated. For each of these objects there will be a description which approach was used. What fits best for you will depend on your project.
+
+Basically there is two ways how to handle callbacks from OBS for objects like outputs or sources:
+1. Store everything in the unmanaged object that is passed to and from OBS. --> Do this when only unmanaged fields need to be stored and managed code doesn't need to be applied to any of the data, e.g. when a filter does its job solely based on calling OBS functions. See [here](https://github.com/YorVeX/xObsBrowserAutoRefresh/blob/main/BrowserFilter.cs) for another example outside of this repo for an example how this can be done and how the fields are accessed from the callbacks.
+2. Store everything in a managed object, which cannot be passed to and from OBS, so the OBS data is only used to identify/index the right managed data from a list. Then either the static callback directly works with the data from that list or invokes instance functions on an object from the list, which then can simply work with their own instance variables. --> Do this when you want/need to use managed code, e.g. to provide a small HTTP server or use an HTTP client from .NET base functionality. This introduces some extra complexity so should only be done when needed.
+
+Mixtures of both variants are also possible.
+
 ## Content
 This plugin code demonstrates different concepts about using unmanaged vs. managed code within a C# OBS plugin for the different items and source code files it includes. What exactly each file demonstrates is explained in the next sections.
 
@@ -51,11 +67,29 @@ In addition to example settings (called "properties" in OBS) there is also butto
 ### Output.cs
 This class registers an [output](https://obsproject.com/docs/reference-outputs.html) in OBS. When it's active it receives all the frame data from OBS. This specific output doesn't register for audio data, though it still shows the function signature necessary for the raw_audio callback, which needs to be provided even when the output is only registering itself for video data. The video data is itself is also not really processed, for the sake of this example the plugin is merely logging the frame timestamps as OBS debug log messages.
 
-### Filter.cs
-_TBD_
+**Managed vs. unmanaged, instance vs. static**
+
+The assumption is that there will be only one output, so everything is based on static fields and methods. A "Context" struct is used to show the basic concept behind this for the OBS related objects, this is the struct that will be passed to OBS and passed back to the plugin by OBS when callbacks are invoked, although it is not really used. Other things are simply stored in global variables (they are named with preceding underscores), since everything is static and only one output uses this it won't be a problem.
 
 ## Source.cs
-_TBD_
+This class registers a [source](https://obsproject.com/docs/reference-sources.html) in OBS. To give you a template for the callbacks there are very many implemented here, even when they don't do anything but logging that they were called so that you can test when which callback is invoked by OBS. On module level it also prepares an image downloaded from the internet that is used as a texture, so it also has some managed code when using the HttpClient class for this.
+
+It also shows the basic concept of surrounding graphics functions with Obs.obs_enter_graphics() and Obs.obs_leave_graphics() calls and image_source_video_render() shows how a texture can be drawn.
+
+Example properties of various types are added to show how a source could be made configurable.
+
+**Managed vs. unmanaged, instance vs. static**
+
+There can be more than one source of this type, however, the callback code doesn't do anything source specific. Instead the texture to be drawn is simply shared between all sources so much like for the Output class this is simply stored in global variables.
+
+### Filter.cs
+This class registers a filter in OBS, which internally is also just a source with some specific flags and a few different callbacks. A getFilter() helper function makes the transition from a static callback context to the instance context easy, based on the object that OBS hands over for each callback.
+
+Example properties of various types are added to show how a source could be made configurable.
+
+**Managed vs. unmanaged, instance vs. static**
+
+Potentially an infinite number of filters could be added to various sources or even the same source, hence data beeds to be stored per filter. However, the callbacks are still static so unlike for the Output class we really need the data passed to us by OBS to identify the filter the code is called for. For the sake of this example let's pretend managed code is needed, therefore in this case the Context structure is only used to identify the filter by an ID number from a list and store everything else in instance variables. Then we can invoke instance functions and these can work within the context of their instance. This is demonstrated here with the ProcessFrame() function which is a fully managed function working with its instance variables.
 
 # Building
 This plugin depends on the [NetObsBindings](https://github.com/kostya9/NetObsBindings) for building, you don't need to build this from source though, the project file provided in this repo already includes this as a [NuGet package](https://www.nuget.org/packages/NetObsBindings).
