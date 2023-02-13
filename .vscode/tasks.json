@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "-c",
+                "Release",
+                "-o",
+                "publish",
+                "-r",
+                "win-x64",
+                "/p:NativeLib=Shared",
+                "/p:SelfContained=true"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "publish and release",
+            "type": "shell",
+            "command": ".\\release.cmd",
+            "dependsOrder": "sequence",
+            "dependsOn": ["publish"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": ".\\test.local.cmd"
+        },
+        {
+            "label": "publish and test",
+            "type": "shell",
+            "command": ".\\test.local.cmd",
+            "dependsOrder": "sequence",
+            "dependsOn": ["publish"],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
