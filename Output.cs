@@ -72,9 +72,9 @@ public static class Output
   public static unsafe sbyte* output_get_name(void* data)
   {
     Module.Log("output_get_name called", ObsLogLevel.Debug);
-    var asciiBytes = Encoding.UTF8.GetBytes("C# Example Output");
-    fixed (byte* logMessagePtr = asciiBytes)
-      return (sbyte*)logMessagePtr;
+    var asciiBytes = "C# Example Output"u8;
+    fixed (byte* outputName = asciiBytes)
+      return (sbyte*)outputName;
   }
 
   [UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]

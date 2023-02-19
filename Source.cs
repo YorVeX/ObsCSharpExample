@@ -21,7 +21,7 @@ public class Source
   #region Helper methods
   public static unsafe void Register()
   {
-    new Thread(() => prepareImage("https://obsproject.com/assets/images/new_icon_small.png")).Start();
+    Task.Run(() => prepareImage("https://obsproject.com/assets/images/new_icon_small.png"));
 
     var sourceInfo = new obs_source_info();
     fixed (byte* id = Encoding.UTF8.GetBytes(Module.ModuleName + " Source"))
@@ -81,15 +81,15 @@ public class Source
   public static unsafe sbyte* image_source_get_name(void* data)
   {
     Module.Log("image_source_get_name called", ObsLogLevel.Debug);
-    fixed (byte* logMessagePtr = Encoding.UTF8.GetBytes("C# Example Image Source"))
-      return (sbyte*)logMessagePtr;
+    fixed (byte* sourceName = "C# Example Image Source"u8)
+      return (sbyte*)sourceName;
   }
 
   [UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
   public static unsafe void* image_source_create(obs_data* settings, obs_source* source)
   {
     Module.Log("image_source_create called", ObsLogLevel.Debug);
-    Context* context = (Context*)Marshal.AllocCoTaskMem(sizeof(Context)); ;
+    Context* context = (Context*)Marshal.AllocCoTaskMem(sizeof(Context));
     context->Settings = settings;
     context->Source = source;
     return (void*)context;
@@ -140,20 +140,20 @@ public class Source
 
     var properties = ObsProperties.obs_properties_create();
     fixed (byte*
-      labelId = Encoding.UTF8.GetBytes("label"),
+      labelId = "label"u8,
       labelCaption = Module.ObsText("LabelCaption"),
       labelText = Module.ObsText("LabelText"),
-      textboxId = Encoding.UTF8.GetBytes("textbox"),
+      textboxId = "textbox"u8,
       textboxCaption = Module.ObsText("TextboxCaption"),
       textboxText = Module.ObsText("TextboxText"),
-      buttonId = Encoding.UTF8.GetBytes("button"),
+      buttonId = "button"u8,
       buttonCaption = Module.ObsText("ButtonCaption"),
       buttonText = Module.ObsText("ButtonText"),
-      urlButtonId = Encoding.UTF8.GetBytes("url_button"),
+      urlButtonId = "url_button"u8,
       urlButtonCaption = Module.ObsText("UrlButtonCaption"),
       urlButtonText = Module.ObsText("UrlButtonText"),
       urlButtonTarget = Module.ObsText("UrlButtonTarget"),
-      checkboxId = Encoding.UTF8.GetBytes("checkbox"),
+      checkboxId = "checkbox"u8,
       checkboxCaption = Module.ObsText("CheckboxCaption"),
       checkboxText = Module.ObsText("CheckboxText")
     )
@@ -183,7 +183,7 @@ public class Source
   {
     Module.Log("image_source_get_defaults called", ObsLogLevel.Debug);
     fixed (byte*
-      textboxId = Encoding.UTF8.GetBytes("textbox"),
+      textboxId = "textbox"u8,
       textboxDefaultText = Module.ObsText("TextboxDefaultText")
     )
     {
@@ -230,7 +230,7 @@ public class Source
 
     ObsGraphics.gs_blend_state_push();
     ObsGraphics.gs_blend_function(gs_blend_type.GS_BLEND_ONE, gs_blend_type.GS_BLEND_INVSRCALPHA);
-    fixed (byte* imageParam = Encoding.UTF8.GetBytes("image"))
+    fixed (byte* imageParam = "image"u8)
       ObsGraphics.gs_effect_set_texture(ObsGraphics.gs_effect_get_param_by_name(effect, (sbyte*)imageParam), _texture);
     ObsGraphics.gs_draw_sprite(_texture, 0, _textureWidth, _textureHeight);
     ObsGraphics.gs_blend_state_pop();
