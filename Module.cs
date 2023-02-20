@@ -83,7 +83,7 @@ public static class Module
     switch (eventName)
     {
       case ObsInterop.obs_frontend_event.OBS_FRONTEND_EVENT_FINISHED_LOADING:
-        fixed (byte* menuItemText = Encoding.UTF8.GetBytes("C# Example Output"))
+        fixed (byte* menuItemText = "C# Example Output"u8)
           ObsFrontendApi.obs_frontend_add_tools_menu_item((sbyte*)menuItemText, &ToolsMenuItemClicked, null);
         break;
       case ObsInterop.obs_frontend_event.OBS_FRONTEND_EVENT_EXIT:
