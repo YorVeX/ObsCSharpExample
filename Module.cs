@@ -31,17 +31,17 @@ public static class Module
       ObsBase.blogva((int)logLevel, (sbyte*)logMessagePtr, null);
   }
 
-  public static unsafe byte[] ObsText(string identifier, params object[] args)
+  public static byte[] ObsText(string identifier, params object[] args)
   {
     return Encoding.UTF8.GetBytes(string.Format(ObsTextString(identifier), args));
   }
 
-  public static unsafe byte[] ObsText(string identifier)
+  public static byte[] ObsText(string identifier)
   {
     return Encoding.UTF8.GetBytes(ObsTextString(identifier));
   }
 
-  public static unsafe string ObsTextString(string identifier, params object[] args)
+  public static string ObsTextString(string identifier, params object[] args)
   {
     return string.Format(ObsTextString(identifier), args);
   }
@@ -83,7 +83,7 @@ public static class Module
     switch (eventName)
     {
       case ObsInterop.obs_frontend_event.OBS_FRONTEND_EVENT_FINISHED_LOADING:
-        fixed (byte* menuItemText = Encoding.UTF8.GetBytes("C# Example Output"))
+        fixed (byte* menuItemText = "C# Example Output"u8)
           ObsFrontendApi.obs_frontend_add_tools_menu_item((sbyte*)menuItemText, &ToolsMenuItemClicked, null);
         break;
       case ObsInterop.obs_frontend_event.OBS_FRONTEND_EVENT_EXIT:
@@ -134,13 +134,13 @@ public static class Module
   }
 
   [UnmanagedCallersOnly(EntryPoint = "obs_module_post_load", CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
-  public static unsafe void obs_module_post_load()
+  public static void obs_module_post_load()
   {
     Log("obs_module_post_load called", ObsLogLevel.Debug);
   }
 
   [UnmanagedCallersOnly(EntryPoint = "obs_module_unload", CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
-  public static unsafe void obs_module_unload()
+  public static void obs_module_unload()
   {
     Log("obs_module_unload called", ObsLogLevel.Debug);
     SettingsDialog.Save();

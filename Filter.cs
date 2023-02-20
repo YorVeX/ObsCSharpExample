@@ -1,19 +1,19 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Text;
 using ObsInterop;
 namespace ObsCSharpExample;
 
 public class Filter
 {
-  public unsafe struct Context
+  public struct Context
   {
     public uint FilterId;
   }
 
   #region Class fields
   static uint _filterCount = 0;
-  static Dictionary<uint, Filter> _filterList = new Dictionary<uint, Filter>();
-  static readonly object _filterListLock = new Object();
+  static ConcurrentDictionary<uint, Filter> _filterList = new ConcurrentDictionary<uint, Filter>();
   #endregion Class fields
 
   #region Instance fields
@@ -27,15 +27,9 @@ public class Filter
   }
 
   // frame handling
-  readonly object _frameLock = new Object();
   uint _frameCycleCounter;
-  uint FrameCycleCounter
-  {
-    get { lock (_frameLock) return _frameCycleCounter; }
-    set { lock (_frameLock) _frameCycleCounter = value; }
-  }
+  
   #endregion Instance fields
-
 
   public unsafe Filter(obs_data* settings, obs_source* obsFilter, Context* contextPointer)
   {
@@ -56,10 +50,10 @@ public class Filter
     // ⚠️ this code is executed for every single frame, whatever is done here needs to be done fast, or it can cause rendering lag
     try
     {
-      uint frameCycleCounter = FrameCycleCounter++;
+      uint frameCycleCounter = Interlocked.Increment(ref _frameCycleCounter);
       if ((frameCycleCounter > 5) && (frameCycleCounter > fps)) // do this only roughly once per second
       {
-        FrameCycleCounter = 1;
+        _frameCycleCounter = 0;
         Module.Log("ProcessFrame called, filter frame timestamp: " + frameTimestamp, ObsLogLevel.Debug);
       }
     }
@@ -99,8 +93,7 @@ public class Filter
   static unsafe private Filter getFilter(void* data)
   {
     var context = (Context*)data;
-    lock (_filterListLock)
-      return _filterList[(*context).FilterId];
+    return _filterList[(*context).FilterId];
   }
   #endregion Helper methods
 
@@ -109,8 +102,8 @@ public class Filter
   public static unsafe sbyte* filter_get_name(void* data)
   {
     Module.Log("filter_get_name called", ObsLogLevel.Debug);
-    fixed (byte* logMessagePtr = Encoding.UTF8.GetBytes("C# Example Filter"))
-      return (sbyte*)logMessagePtr;
+    fixed (byte* filterName = "C# Example Filter"u8)
+      return (sbyte*)filterName;
   }
 
   [UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
@@ -121,8 +114,7 @@ public class Filter
     contextPointer->FilterId = ++_filterCount;
 
     var filter = new Filter(settings, source, contextPointer);
-    lock (_filterListLock)
-      _filterList.Add(contextPointer->FilterId, filter);
+    _filterList.TryAdd(contextPointer->FilterId, filter);
 
     return (void*)contextPointer;
   }
@@ -164,8 +156,8 @@ public class Filter
     Module.Log("filter_destroy called", ObsLogLevel.Debug);
 
     var filter = getFilter(data);
-    lock (_filterListLock)
-      _filterList.Remove(filter.FilterId);
+    _filterList.TryRemove(filter.FilterId, out _);
+
     filter.Dispose();
   }
 
@@ -176,20 +168,20 @@ public class Filter
 
     var properties = ObsProperties.obs_properties_create();
     fixed (byte*
-      labelId = Encoding.UTF8.GetBytes("label"),
+      labelId = "label"u8,
       labelCaption = Module.ObsText("LabelCaption"),
       labelText = Module.ObsText("LabelText"),
-      textboxId = Encoding.UTF8.GetBytes("textbox"),
+      textboxId = "textbox"u8,
       textboxCaption = Module.ObsText("TextboxCaption"),
       textboxText = Module.ObsText("TextboxText"),
-      buttonId = Encoding.UTF8.GetBytes("button"),
+      buttonId = "button"u8,
       buttonCaption = Module.ObsText("ButtonCaption"),
       buttonText = Module.ObsText("ButtonText"),
-      urlButtonId = Encoding.UTF8.GetBytes("url_button"),
+      urlButtonId = "url_button"u8,
       urlButtonCaption = Module.ObsText("UrlButtonCaption"),
       urlButtonText = Module.ObsText("UrlButtonText"),
       urlButtonTarget = Module.ObsText("UrlButtonTarget"),
-      checkboxId = Encoding.UTF8.GetBytes("checkbox"),
+      checkboxId = "checkbox"u8,
       checkboxCaption = Module.ObsText("CheckboxCaption"),
       checkboxText = Module.ObsText("CheckboxText")
     )
@@ -219,7 +211,7 @@ public class Filter
   {
     Module.Log("filter_get_defaults called");
     fixed (byte*
-      textboxId = Encoding.UTF8.GetBytes("textbox"),
+      textboxId = "textbox"u8,
       textboxDefaultText = Module.ObsText("TextboxDefaultText")
     )
     {

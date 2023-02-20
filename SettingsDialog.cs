@@ -83,23 +83,23 @@ public static class SettingsDialog
   {
     var properties = ObsProperties.obs_properties_create();
     fixed (byte*
-      labelId = Encoding.UTF8.GetBytes("label"),
+      labelId = "label"u8,
       labelCaption = Module.ObsText("LabelCaption"),
       labelText = Module.ObsText("LabelText"),
-      textboxId = Encoding.UTF8.GetBytes("textbox"),
+      textboxId = "textbox"u8,
       textboxCaption = Module.ObsText("TextboxCaption"),
       textboxText = Module.ObsText("TextboxText"),
-      outputStartButtonId = Encoding.UTF8.GetBytes("output_start_button"),
+      outputStartButtonId = "output_start_button"u8,
       outputStartButtonCaption = Module.ObsText("OutputStartButtonCaption"),
       outputStartButtonText = Module.ObsText("OutputStartButtonText"),
-      outputStopButtonId = Encoding.UTF8.GetBytes("output_stop_button"),
+      outputStopButtonId = "output_stop_button"u8,
       outputStopButtonCaption = Module.ObsText("OutputStopButtonCaption"),
       outputStopButtonText = Module.ObsText("OutputStopButtonText"),
-      urlButtonId = Encoding.UTF8.GetBytes("url_button"),
+      urlButtonId = "url_button"u8,
       urlButtonCaption = Module.ObsText("UrlButtonCaption"),
       urlButtonText = Module.ObsText("UrlButtonText"),
       urlButtonTarget = Module.ObsText("UrlButtonTarget"),
-      checkboxId = Encoding.UTF8.GetBytes("checkbox"),
+      checkboxId = "checkbox"u8,
       checkboxCaption = Module.ObsText("CheckboxCaption"),
       checkboxText = Module.ObsText("CheckboxText")
     )
@@ -131,7 +131,7 @@ public static class SettingsDialog
   {
     Module.Log("settings_get_defaults called", ObsLogLevel.Debug);
     fixed (byte*
-      textboxId = Encoding.UTF8.GetBytes("textbox"),
+      textboxId = "textbox"u8,
       textboxDefaultText = Module.ObsText("TextboxDefaultText")
     )
     {
