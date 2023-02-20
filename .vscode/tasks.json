@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "publish",
+            "label": "publish (win64)",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -23,24 +23,24 @@
             }
         },
         {
-            "label": "publish and release",
+            "label": "publish and release (win64)",
             "type": "shell",
             "command": ".\\release.cmd",
             "dependsOrder": "sequence",
-            "dependsOn": ["publish"],
+            "dependsOn": ["publish (win64)"],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "test",
+            "label": "test (win64)",
             "type": "shell",
             "command": ".\\test.local.cmd"
         },
         {
-            "label": "publish and test",
+            "label": "publish and test (win64)",
             "type": "shell",
             "command": ".\\test.local.cmd",
             "dependsOrder": "sequence",
-            "dependsOn": ["publish"],
+            "dependsOn": ["publish (win64)"],
             "problemMatcher": "$msCompile"
         }
     ]
