@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "publish (win64)",
+            "label": "publish (win-x64)",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -10,9 +10,10 @@
                 "-c",
                 "Release",
                 "-o",
-                "publish",
+                "publish\\win-x64",
                 "-r",
                 "win-x64",
+                "/p:DefineConstants=WINDOWS",
                 "/p:NativeLib=Shared",
                 "/p:SelfContained=true"
             ],
@@ -23,24 +24,45 @@
             }
         },
         {
-            "label": "publish and release (win64)",
+            "label": "publish and release (WSL linux-x64)",
             "type": "shell",
-            "command": ".\\release.cmd",
-            "dependsOrder": "sequence",
-            "dependsOn": ["publish (win64)"],
-            "problemMatcher": "$msCompile"
+            "options": {
+                "cwd": "${workspaceFolder}/scripts/wsl"
+            },
+            "command": ".\\build-linux-x64-wsl.cmd"
         },
         {
-            "label": "test (win64)",
+            "label": "test (win-x64)",
             "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/scripts"
+            },
             "command": ".\\test.local.cmd"
         },
         {
-            "label": "publish and test (win64)",
+            "label": "publish and test (win-x64)",
             "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/scripts"
+            },
             "command": ".\\test.local.cmd",
             "dependsOrder": "sequence",
-            "dependsOn": ["publish (win64)"],
+            "dependsOn": [
+                "publish (win-x64)"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish and release (win-x64)",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/scripts"
+            },
+            "command": ".\\release-win-x64.cmd",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "publish (win-x64)"
+            ],
             "problemMatcher": "$msCompile"
         }
     ]

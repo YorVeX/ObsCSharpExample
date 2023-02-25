@@ -28,7 +28,7 @@ public class Filter
 
   // frame handling
   uint _frameCycleCounter;
-  
+
   #endregion Instance fields
 
   public unsafe Filter(obs_data* settings, obs_source* obsFilter, Context* contextPointer)
