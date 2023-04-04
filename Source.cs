@@ -1,4 +1,7 @@
-﻿using System.Runtime.InteropServices;
+﻿// SPDX-FileCopyrightText: © 2023 YorVeX, https://github.com/YorVeX
+// SPDX-License-Identifier: MIT
+
+using System.Runtime.InteropServices;
 using System.Text;
 using ObsInterop;
 namespace ObsCSharpExample;
