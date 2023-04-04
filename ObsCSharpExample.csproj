@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NetObsBindings" Version="0.0.1.29-alpha" />
+    <PackageReference Include="NetObsBindings" Version="0.0.1.32-alpha" />
   </ItemGroup>
 
 </Project>
