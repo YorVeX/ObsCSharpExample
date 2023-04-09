@@ -9,14 +9,18 @@ OBS Classic still had a [CLR Host Plugin](https://obsproject.com/forum/resources
 
 ## Prerequisites
 - OBS 29+ 64 bit
-- Currently only working on Windows (tested only on Windows 10, but Windows 11 should also work)
+- Windows
+  - tested only on Windows 10, but Windows 11 should also work
+- Linux
+  - not tested
+  - binary build created on Ubuntu 20.04 WSL environment, therefore linked against glibc 2.31
 
 ## FAQ
 - **Q**: Why is the binary plugin file so big compared to other plugins for the little bit it does, will this cause issues?
   - **A**: Unlike other plugins it's not written directly in C++ but in C# using .NET 7 and NativeAOT (for more details read on in the section for developers). This produces some overhead in the actual plugin file, however, the code that matters for functionality of this plugin should be just as efficient and fast as code directly written in C++ so there's no reason to worry about performance on your system.
 
-- **Q**: Will there be a version for other operating systems, e.g. Linux?
-  - **A**: NativeAOT only supports compiling for Windows targets when running on Windows and Linux targets when running on Linux, see [here](https://github.com/dotnet/runtime/blob/main/src/coreclr/nativeaot/docs/compiling.md#cross-architecture-compilation). I only use Windows myself so in order to be able to compile for Linux I'd need to set up a Linux VM first. I will probably do that at some point in the future but it doesn't have the highest priority. Feel free to try it yourself, will happily integrate contributions (e.g. information, pull requests and binaries) in this direction.
+- **Q**: Will there be a version for MacOS?
+  - **A**: NativeAOT [doesn't support cross-compiling](https://github.com/dotnet/runtime/blob/main/src/coreclr/nativeaot/docs/compiling.md#cross-architecture-compilation) and I don't have a Mac, so I currently can't compile it, let alone test it. You can try to compile it yourself, but note that MacOS [is currently only supported by the next preview version of .NET 8](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/#platformarchitecture-restrictions), although people [do already successfully create builds](https://github.com/dotnet/runtime/issues/79253) with it.
 
 - **Q**: Will there be a 32 bit version of this plugin?
   - **A**: No. Feel free to try and compile it for x86 targets yourself, last time I checked it wasn't fully supported in NativeAOT.
