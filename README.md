@@ -1,4 +1,4 @@
-# ObsCSharpExample
+# OBS C# Example
 
 Example for an OBS plugin written in C# containing various standard items like output, filter, source or a settings dialog in the OBS Tools menu. Meant to be used both to learn writing OBS plugins and C# and as a template for creating new plugins or plugin content like a source or an output.
 
